@@ -1,18 +1,21 @@
-from flask import Flask, render_template, request, redirect, url_for,send_file
-from flask_mysqldb import MySQL
+
+from flask import Flask, render_template, request
 import mysql.connector as db
-import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
-
+%matplotlib inline
 app = Flask(__name__)
-
-app.config['MYSQL_HOST'] = 'gofin-aurora-instance-1.ci0rkg2zgzsd.us-east-1.rds.amazonaws.com'
-app.config['MYSQL_USER'] = 'malikam'
-app.config['MYSQL_PASSWORD'] = 'Malika@98966'
-app.config['MYSQL_DB'] = 'usda'
-
-mydb = MySQL(app)
+mydb = db.connect(
+    host = "gofin-aurora-instance-1.ci0rkg2zgzsd.us-east-1.rds.amazonaws.com",
+    user = "malikam",
+    password = "Malika@98966",
+    database = "usda"
+)
+if mydb:
+    print ("Connected Successfully")
+else:
+    print ("Connection Not Established")
+mycursor = mydb.cursor()
 
 GD,CD,SD,UD,PP,CDesc,State,FD,PD,table = "","","","","","","","","",""
 gd_d, cd_d, sd_d, ud_d, pp_d, cdesc_d, fd_d,pd_d, final_d = "","","","","","","","",""
@@ -21,9 +24,10 @@ gd_d, cd_d, sd_d, ud_d, pp_d, cdesc_d, fd_d,pd_d, final_d = "","","","","","",""
 @app.route("/home")
 def home():
     global gd_d
-    cursor = mydb.connection.cursor()
-    cursor.execute("SELECT * FROM S_GROUP_DESC")
-    gd_d = cursor.fetchall()
+    cursor = mydb.cursor()
+    cursor.callproc("S_GROUP_DESC_SP")
+    for result in cursor.stored_results():
+        gd_d = result.fetchall()
     cursor.close()
     return render_template("Request.html",gd_data = gd_d)
 
@@ -32,9 +36,10 @@ def group_description():
     global GD
     global gd_d, cd_d
     GD = request.args.get("GD")
-    cursor = mydb.connection.cursor()
-    cursor.execute("""SELECT CROPS FROM S_CROPS where GROUP_DESC = %s order by CROPS""",(GD,))
-    cd_d = cursor.fetchall()
+    cursor = mydb.cursor()
+    cursor.callproc("S_CROPS_SP",(GD,))
+    for result in cursor.stored_results():
+        cd_d = result.fetchall()
     cursor.close()
     return render_template("Request.html", cd_data =cd_d,gd_data = gd_d)
 
@@ -45,10 +50,10 @@ def commodity_desc():
     #print(GD)
     CD = request.args.get("CD")
     #print(CD)
-    cursor = mydb.connection.cursor()
-    cursor.execute("""SELECT STATISTICCAT_DESC FROM S_STATISTICCAT_DESC where 
-                    GROUP_DESC = %s and CROPS = %s order by STATISTICCAT_DESC""",(GD,CD))
-    sd_d = cursor.fetchall()
+    cursor = mydb.cursor()
+    cursor.callproc("S_STATISTICCAT_DESC_SP",(GD,CD))
+    for result in cursor.stored_results():
+        sd_d = result.fetchall()
     cursor.close()
     return render_template("Request.html", sd_data = sd_d,cd_data =cd_d,gd_data = gd_d)
 
@@ -58,10 +63,10 @@ def statisticcat_desc():
     global gd_d, cd_d, sd_d, ud_d
 
     SD = request.args.get("SD")
-    cursor = mydb.connection.cursor()
-    cursor.execute("""SELECT UNIT_DESC FROM S_UNIT_DESC where 
-                    GROUP_DESC = %s and CROPS = %s and STATISTICCAT_DESC = %s""",(GD,CD,SD))
-    ud_d = cursor.fetchall()
+    cursor = mydb.cursor()
+    cursor.callproc("S_UNIT_DESC_SP",(GD,CD,SD))
+    for result in cursor.stored_results():
+        ud_d = result.fetchall()
     cursor.close()
     return render_template("Request.html", ud_data = ud_d, sd_data = sd_d,cd_data =cd_d,gd_data = gd_d)
 
@@ -71,12 +76,10 @@ def unit_desc():
     global gd_d, cd_d, sd_d, ud_d, pp_d
 
     UD = request.args.get("UD")
-    cursor = mydb.connection.cursor()
-    cursor.execute("""SELECT PRODUCTION_PRACTICE FROM usda.S_PROD_PRACTICE 
-                    where 
-                    GROUP_DESC = %s and CROPS = %s and STATISTICCAT_DESC = %s and UNIT_DESC = %s
-                    order by PRODUCTION_PRACTICE""",(GD,CD,SD,UD))
-    pp_d = cursor.fetchall()
+    cursor = mydb.cursor()
+    cursor.callproc("S_PROD_PRACTICE_SP",(GD,CD,SD,UD))
+    for result in cursor.stored_results():
+        pp_d = result.fetchall()
     cursor.close()
     return render_template("Request.html", pp_data = pp_d, ud_data = ud_d, sd_data = sd_d,cd_data =cd_d,gd_data = gd_d)
     
@@ -86,10 +89,10 @@ def production_prac():
     global gd_d, cd_d, sd_d, ud_d, pp_d, cdesc_d
 
     PP = request.args.get("PP")
-    cursor = mydb.connection.cursor()
-    cursor.execute("""SELECT CLASS_DESC FROM usda.S_CLASS_DESC where GROUP_DESC = %s and CROPS = %s and STATISTICCAT_DESC = %s 
-                      and UNIT_DESC = %s and PRODUCTION_PRACTICE = %s order by PRODUCTION_PRACTICE""",(GD,CD,SD,UD,PP))
-    cdesc_d = cursor.fetchall()
+    cursor = mydb.cursor()
+    cursor.callproc("S_CLASS_DESC_SP",(GD,CD,SD,UD,PP))
+    for result in cursor.stored_results():
+        cdesc_d = result.fetchall()
     cursor.close()
     return render_template("Request.html", cdesc_data = cdesc_d, pp_data = pp_d, ud_data = ud_d, sd_data = sd_d,cd_data =cd_d,gd_data = gd_d)   
 
@@ -106,96 +109,51 @@ def States():
     global gd_d, cd_d, sd_d, ud_d, pp_d, cdesc_d, fd_d
 
     State = request.args.get("States")
-    cursor = mydb.connection.cursor()
+    cursor = mydb.cursor()
    
     if(State == 'US TOTAL'):
         if(GD == 'VEGETABLES'):
-            sql_query = """SELECT Distinct FREQ_DESC FROM usda.S_VEGETABLE_US_DETAILS 
-                           WHERE 
-                           CROP_TYPE = %s AND PRODUCTION_PRACTICE = %s and UNIT_DESC = %s and CLASS_DESC = %s and `{}` IS NOT NULL """.format(SD)
-
             table = "S_VEGETABLE_US_DETAILS"
 
         elif(GD == 'HORTICULTURE'):
-            sql_query = """SELECT Distinct FREQ_DESC FROM usda.S_HORTICULTURE_US_DETAILS
-                            WHERE 
-                            CROP_TYPE = %s AND PRODUCTION_PRACTICE = %s and UNIT_DESC = %s and CLASS_DESC = %s and `{}` IS NOT NULL """.format(SD,SD)
-            
             table = "S_HORTICULTURE_US_DETAILS"
 
         elif(GD == 'FIELD CROPS'):
-
-            sql_query = """SELECT Distinct FREQ_DESC FROM usda.S_FIELD_CROPS_US_DETAILS
-                        WHERE CROP_TYPE = %s AND PRODUCTION_PRACTICE = %s and UNIT_DESC = %s and CLASS_DESC = %s and `{}` IS NOT NULL """.format(SD,SD)
-
             table = "S_FIELD_CROPS_US_DETAILS"
 
         elif(GD == 'FRUIT & TREE NUTS'):
-
-            sql_query = """SELECT Distinct FREQ_DESC FROM usda.S_FRUIT_AND_TREE_NUTS_US_DETAILS
-                        WHERE CROP_TYPE = %s AND PRODUCTION_PRACTICE = %s and UNIT_DESC = %s and CLASS_DESC = %s and `{}` IS NOT NULL """.format(SD,SD)
-
             table = "S_FRUIT_AND_TREE_NUTS_US_DETAILS"
 
         elif(GD == 'CROP TOTALS'):
-
-            sql_query = """SELECT Distinct FREQ_DESC FROM usda.S_CROP_TOTALS_US_DETAILS
-                        WHERE CROP_TYPE = %s AND PRODUCTION_PRACTICE = %s and UNIT_DESC = %s and CLASS_DESC = %s and `{}` IS NOT NULL """.format(SD,SD)
-
             table = "S_CROP_TOTALS_US_DETAILS"
 
         elif(GD == 'COMMODITIES'):
-
-            sql_query = """SELECT Distinct FREQ_DESC FROM usda.S_COMMODITIES_US_DETAILS 
-                        WHERE CROP_TYPE = %s AND PRODUCTION_PRACTICE = %s and UNIT_DESC = %s and CLASS_DESC = %s and `{}` IS NOT NULL """.format(SD,SD)
-
             table = "S_COMMODITIES_US_DETAILS"    
 
 #OTHER STATES        
     else:
         if(GD == 'VEGETABLES'):
-            sql_query = """SELECT Distinct FREQ_DESC FROM usda.S_VEGETABLE_STATE_DETAILS 
-                            WHERE CROP_TYPE = %s AND PRODUCTION_PRACTICE = %s and UNIT_DESC = %s and CLASS_DESC = %s and `{}` IS NOT NULL """.format(SD,SD)
-
             table = "S_VEGETABLE_STATE_DETAILS"
 
         elif(GD == 'HORTICULTURE'):
-
-            sql_query = """SELECT Distinct FREQ_DESC FROM usda.S_HORTICULTURE_STATE_DETAILS 
-                        WHERE CROP_TYPE = %s AND PRODUCTION_PRACTICE = %s and UNIT_DESC = %s and CLASS_DESC = %s and `{}` IS NOT NULL """.format(SD,SD)
-
             table = "S_HORTICULTURE_STATE_DETAILS"
 
         elif(GD == 'FIELD CROPS'):
-
-            sql_query = """SELECT Distinct FREQ_DESC FROM usda.S_FIELD_CROPS_STATE_DETAILS 
-                        WHERE CROP_TYPE = %s AND PRODUCTION_PRACTICE = %s and UNIT_DESC = %s and CLASS_DESC = %s and `{}` IS NOT NULL """.format(SD,SD)
-
             table = "S_FIELD_CROPS_STATE_DETAILS"
 
         elif(GD == 'FRUIT & TREE NUTS'):
-
-            sql_query = """SELECT Distinct FREQ_DESC FROM usda.S_FRUIT_AND_TREE_NUTS_STATE_DETAILS 
-                        WHERE CROP_TYPE = %s AND PRODUCTION_PRACTICE = %s and UNIT_DESC = %s and CLASS_DESC = %s and `{}` IS NOT NULL """.format(SD,SD)
-
             table = "S_FRUIT_AND_TREE_NUTS_STATE_DETAILS"
 
         elif(GD == 'CROP TOTALS'):
-
-            sql_query = """SELECT Distinct FREQ_DESC FROM usda.S_CROP_TOTALS_STATE_DETAILS 
-                        WHERE CROP_TYPE = %s AND PRODUCTION_PRACTICE = %s and UNIT_DESC = %s and CLASS_DESC = %s and `{}` IS NOT NULL """.format(SD,SD)
-
             table = "S_CROP_TOTALS_STATE_DETAI"
 
         elif(GD == 'COMMODITIES'):
-
-            sql_query = """SELECT Distinct FREQ_DESC FROM usda.S_COMMODITIES_STATE_DETAILS; 
-                        WHERE CROP_TYPE = %s AND PRODUCTION_PRACTICE = %s and UNIT_DESC = %s and CLASS_DESC = %s and `{}` IS NOT NULL """.format(SD,SD)
-
             table = "S_COMMODITIES_STATE_DETAILS"
             
-    cursor.execute(sql_query, (CD, PP,UD,CDesc))
-    fd_d = cursor.fetchall()
+    sql_query = "FREQ_DESC_SP"
+    cursor.callproc(sql_query, (table,CD, PP,UD,CDesc,SD))
+    for result in cursor.stored_results():
+        fd_d = result.fetchall()
     cursor.close()
     return render_template("Request.html", fd_data = fd_d, cdesc_data = cdesc_d, pp_data = pp_d, ud_data = ud_d, sd_data = sd_d,cd_data =cd_d,gd_data = gd_d)
 
@@ -205,10 +163,10 @@ def freq_desc():
     global gd_d, cd_d, sd_d, ud_d, pp_d, cdesc_d, fd_d,pd_d
     
     FD = request.args.get("FD")
-    cursor = mydb.connection.cursor()
-    cursor.execute("""Select Distinct PERIOD_REFERENCE from `{}` 
-            WHERE CROP_TYPE = %s AND PRODUCTION_PRACTICE = %s and UNIT_DESC = %s and CLASS_DESC = %s and FREQ_DESC = %s order by STATE_NAME""".format(table),(CD, PP,UD,CDesc,FD))
-    pd_d = cursor.fetchall()
+    cursor = mydb.cursor()
+    cursor.callproc("PERIOD_REFERENCE_SP",(table,CD, PP,UD,CDesc,SD,FD))
+    for result in cursor.stored_results():
+        pd_d = result.fetchall()
     cursor.close()
     return render_template("Request.html", pd_data = pd_d, fd_data = fd_d, cdesc_data = cd_d, pp_data = pp_d, ud_data = ud_d, sd_data = sd_d,cd_data =cd_d,gd_data = gd_d)
 
@@ -218,13 +176,12 @@ def period_ref():
     global gd_d, cd_d, sd_d, ud_d, pp_d, cdesc_d, fd_d,pd_d, final_d
 
     PD = request.args.get("PD")
-    cursor = mydb.connection.cursor()
-    cursor.execute("""Select CROP_TYPE, PRODUCTION_PRACTICE, YEAR, PERIOD_REFERENCE, STATE_NAME, `{}`, CLASS_DESC 
-                    from `{}` 
-                    WHERE CROP_TYPE = %s AND PRODUCTION_PRACTICE = %s and UNIT_DESC = %s and CLASS_DESC = %s and FREQ_DESC = %s and PERIOD_REFERENCE = %s and `{}` IS NOT NULL """.format(SD,table,SD),(CD, PP,UD,CDesc,FD,PD))
-
-    columns = [description[0] for description in cursor.description]
-    final_d = cursor.fetchall()
+    cursor = mydb.cursor()
+    cursor.callproc("CROP_DETAILS_SP",(table,CD, PP,UD,CDesc,SD,FD,PD))
+    for result in cursor.stored_results():
+        final_d = result.fetchall()   
+    cursor.close()     
+    columns = ["CROP_TYPE", "PRODUCTION_PRACTICE", "YEAR", "PERIOD_REFERENCE", "STATE_NAME",SD,"CLASS_DESC"]
     return render_template("Request.html", data = final_d, pd_data = pd_d, fd_data = fd_d, cdesc_data = cdesc_d, pp_data = pp_d, ud_data = ud_d, sd_data = sd_d,cd_data =cd_d,gd_data = gd_d,columns=columns)
 
 @app.route('/plot', methods=['POST'])
@@ -233,12 +190,12 @@ def plot_post():
     
     xaxis = request.form['xaxis']
     yaxis = request.form['yaxis']
-    cursor = mydb.connection.cursor()
-    query = """Select `{}`, `{}` from `{}` 
-                    WHERE CROP_TYPE = %s AND PRODUCTION_PRACTICE = %s and UNIT_DESC = %s and CLASS_DESC = %s and FREQ_DESC = %s and PERIOD_REFERENCE = %s and `{}` IS NOT NULL """.format(xaxis,yaxis,table,SD)
-    cursor.execute(query, (CD, PP,UD,CDesc,FD,PD))
+    cursor = mydb.cursor()
+    query = "AXIS_SP"
+    cursor.callproc(query, (table,CD, PP,UD,CDesc,SD,FD,PD,xaxis,yaxis))
+    for result in cursor.stored_results():
+        result = result.fetchall()
     columns = [description[0] for description in cursor.description]
-    result = cursor.fetchall()
     # Do something with xaxis and yaxis here
     X=[]
     Y=[]
@@ -292,4 +249,7 @@ def plot_post():
 
 if __name__ =='__main__':
     app.run()
-    
+
+ 
+ 
+ 
