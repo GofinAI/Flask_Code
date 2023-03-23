@@ -1,0 +1,273 @@
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+        
+        <title> Result </title>
+          <style>
+            body {
+              background-color: #f2f2f2;
+            }
+            #con1 {
+              margin: 50px 0px;              
+            }
+            .c1_row1 {
+              border: none;  
+            }
+            table {
+                border-collapse: collapse;
+                width: 100%;
+            }
+            th, td {
+                text-align: left;
+                padding: 8px;
+            }
+            th {
+                background-color: #008CBA;
+                color: white;
+            }
+            tr:nth-child(even) {
+                background-color: #f2f2f2;
+            }  
+            /* Target the container fluid divs */
+            .container-fluid {
+              display: flex;
+              flex-wrap: wrap;
+              justify-content: center;
+            }
+
+            /* Target the select elements */
+            select {
+              width: 100%;
+              padding: 10px;
+              margin-bottom: 20px;
+              border-radius: 5px;
+              border: none;
+              box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+            }
+
+            /* Target the radio buttons */
+            input[type="radio"] {
+              margin-right: 10px;
+            }
+  
+
+          </style>
+    </head>
+    <body>
+        <div class="container-fluid" id="con1">
+            
+            <div class="col-sm-4" class="c1_row1" id="gd_select">
+                <form method="POST">
+                  <label for="GD">Group Description:</label>  
+                   <select name="GD" id="GD" multiple size="4" class="form-group list-group" onclick="executeQuery_gd(event)">
+                        {% for row in gd_data %}
+                            {% for value in row %}
+                              <option value="{{ row[0] }}" class="list-group-item form-control">{{ row[0] }}</option>
+                            {% endfor %}
+                        {% endfor %}
+                    </select>  
+                </form>
+            </div>    
+
+            <div class="col-sm-4" class="c1_row1" id="cd_select">
+                <form method="POST">
+                  <label for="CD">Commodity Description:</label>  
+                   <select name="CD" id="CD" multiple size="4" class="form-group list-group" onclick="executeQuery_cd(event)">
+                        {% for row in cd_data %}
+                            {% for value in row %}
+                              <option value="{{ row[0] }}" class="list-group-item form-control">{{ row[0] }}</option>
+                            {% endfor %}
+                        {% endfor %}
+                    </select> 
+                </form>
+            </div>    
+
+            <div class="col-sm-4" class="c1_row1" id="sd_select">
+                <form method="POST">
+                  <label for="SD">Statisticcat Description:</label>  
+                   <select name="SD" id="SD" multiple size="4" class="form-group list-group" onclick="executeQuery_sd(event)">
+                        {% for row in sd_data %}
+                            {% for value in row %}
+                              <option value="{{ row[0] }}" class="list-group-item form-control">{{ row[0] }}</option>
+                            {% endfor %}
+                        {% endfor %}
+                    </select>
+                </form>
+            </div>
+        </div>
+        
+        <div class="container-fluid" id="con2">
+            <div class="col-sm-4" class="c1_row1" id="ud_select">
+                <form method="POST">
+                  <label for="UD">Unit Description:</label>  
+                   <select name="UD" id="UD" multiple size="4" class="form-group list-group" onclick="executeQuery_ud(event)">
+                        {% for row in ud_data %}
+                            {% for value in row %}
+                              <option value="{{ row[0] }}" class="list-group-item form-control">{{ row[0] }}</option>
+                            {% endfor %}
+                        {% endfor %}
+                    </select> 
+                </form>
+            </div>            
+            
+            <div class="col-sm-4" class="c1_row1" id="pp_select">            
+                <form method="POST">
+                  <label for="PP">Production Practice:</label>  
+                   <select name="PP" id="PP" multiple size="4" class="form-group list-group" onclick="executeQuery_pp(event)">
+                        {% for row in pp_data %}
+                            {% for value in row %}
+                              <option value="{{ row[0] }}" class="list-group-item form-control">{{ row[0] }}</option>
+                            {% endfor %}
+                        {% endfor %}
+                    </select>  
+                </form>
+            </div>
+        
+            <div class="col-sm-4" class="c1_row1" id="cdesc_select">
+                <form method="POST">
+                  <label for="CDesc">Class Description:</label>  
+                   <select name="CDesc" id="CDesc" multiple size="4" class="form-group list-group" onclick="executeQuery_CDesc(event)">
+                        {% for row in cdesc_data %}
+                            {% for value in row %}
+                              <option value="{{ row[0] }}" class="list-group-item form-control">{{ row[0] }}</option>
+                            {% endfor %}
+                        {% endfor %}
+                    </select>  
+                </form>
+            </div>
+        </div>
+        
+        <div class="container-fluid" id="con3">
+            
+            <div class="col-sm-4" class="c1_row1">
+                <form  method="POST" class="form-group">
+                      <h4>Select States: </h4>   
+                      <label for="States">US TOTAL</label>
+                      <input type="radio" id="States" name="States" value="US TOTAL"  onclick="executeQuery_State(event)" class="form-control">
+                      <br>
+                      <label for="States">Other</label>
+                      <input type="radio" id="States" name="States" value="Others"  onclick="executeQuery_State(event)" class="form-control">
+                      <br>
+                </form>
+            </div>
+               
+            <div class="col-sm-4" class="c1_row1" id="fd_select">
+                <form method="POST">
+                  <label for="FD">Freq Description:</label>  
+                   <select name="FD" id="FD" multiple  size="4" class="form-group list-group" onclick="executeQuery_FD(event)" >
+                        {% for row in fd_data %}
+                            {% for value in row %}
+                              <option value="{{ row[0] }}"class="list-group-item form-control">{{ row[0] }}</option>
+                            {% endfor %}
+                        {% endfor %}
+                   </select> 
+                </form>
+            </div> 
+        
+          <div class="col-sm-4" class="c1_row1" id="pd_select">
+            <form method="POST">
+              <label for="PD">Period Reference:</label>  
+               <select name="PD" id="PD" multiple  size="4" class="form-group list-group" onclick="executeQuery_PD(event)">
+                    {% for row in pd_data %}
+                        {% for value in row %}
+                          <option value="{{ row[0] }}" class="list-group-item form-control">{{ row[0] }}</option>
+                        {% endfor %}
+                    {% endfor %}
+                </select>
+            </form>
+          </div>
+      </div>
+        
+        <div>
+            <table> 
+              <thead>
+                <tr>
+                  {% for column in columns %}
+                    <th>{{ column }}</th>
+                  {% endfor %}
+                </tr>
+              </thead>
+              <tbody>
+                {% for row in data %}
+                  <tr>
+                    {% for value in row %}
+                      <td>{{ value }}</td>
+                    {% endfor %}
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+        </div><br><br>    
+        
+        <h1>Select X-axis and Y-axis</h1>
+        <form method="POST" action="/plot">
+            <p>Select the X-axis:</p>
+            {% for column in columns %}
+                <input type="radio" name="xaxis" value="{{ column }}">{{ column }}<br>
+            {% endfor %}
+            <p>Select the Y-axis:</p>
+            {% for column in columns %}
+                <input type="radio" name="yaxis" value="{{ column }}">{{ column }}<br>
+            {% endfor %}
+            <br><br>
+            <input type="submit" value="Submit">
+        </form>
+       
+        <script>
+          
+            
+          function executeQuery_gd(event) {
+              event.preventDefault();
+              var param = document.getElementById("GD").value;
+              window.location.href = "/group_description?GD=" + param;
+          }
+
+          function executeQuery_cd(event) {
+              event.preventDefault();
+              var param = document.getElementById("CD").value;
+              window.location.href = "/commodity_desc?CD=" + param;
+            }
+           function executeQuery_sd(event) {
+            event.preventDefault();   
+            var param = document.getElementById("SD").value;
+            window.location.href = "/statisticcat_desc?SD=" + param;
+          }  
+          function executeQuery_ud(event) {
+            event.preventDefault();  
+            var param = document.getElementById("UD").value;
+            window.location.href = "/unit_desc?UD=" + param;
+          }
+          function executeQuery_pp(event) {
+            event.preventDefault();  
+            var param = document.getElementById("PP").value;
+            window.location.href = "/production_prac?PP=" + param;
+          }
+          function executeQuery_CDesc(event) {
+            event.preventDefault();  
+            var param = document.getElementById("CDesc").value;
+            window.location.href = "/class_desc?CDesc=" + param;
+          }
+          function executeQuery_State(event) {
+            event.preventDefault();  
+            var param = document.getElementById("States").value;
+            window.location.href = "/States?States=" + param;
+          }
+          function executeQuery_FD(event) {
+            event.preventDefault();  
+            var param = document.getElementById("FD").value;
+            window.location.href = "/freq_desc?FD=" + param;
+          }  
+          function executeQuery_PD(event) {
+            event.preventDefault();  
+            var param = document.getElementById("PD").value;
+            window.location.href = "/period_ref?PD=" + param;
+          }    
+    </script>
+    </body>
+</html>    
