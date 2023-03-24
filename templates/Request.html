@@ -12,6 +12,8 @@
           <style>
             body {
               background-color: #f2f2f2;
+              font-family: Arial, sans-serif;
+              font-size: 14p  
             }
             #con1 {
               margin: 50px 0px;              
@@ -19,21 +21,7 @@
             .c1_row1 {
               border: none;  
             }
-            table {
-                border-collapse: collapse;
-                width: 100%;
-            }
-            th, td {
-                text-align: left;
-                padding: 8px;
-            }
-            th {
-                background-color: #008CBA;
-                color: white;
-            }
-            tr:nth-child(even) {
-                background-color: #f2f2f2;
-            }  
+              
             /* Target the container fluid divs */
             .container-fluid {
               display: flex;
@@ -47,7 +35,7 @@
               padding: 10px;
               margin-bottom: 20px;
               border-radius: 5px;
-              border: none;
+              border: 1px solid #ccc;
               box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
             }
 
@@ -55,7 +43,15 @@
             input[type="radio"] {
               margin-right: 10px;
             }
-  
+            select option:hover {
+               background-color: #ddd;
+            }
+            select option:checked {
+               background-color: #008CBA;
+               color: white;
+               padding: 5px;
+               border: 1px solid white;
+            }
 
           </style>
     </head>
@@ -183,39 +179,9 @@
             </form>
           </div>
       </div>
-        
-        <div>
-            <table> 
-              <thead>
-                <tr>
-                  {% for column in columns %}
-                    <th>{{ column }}</th>
-                  {% endfor %}
-                </tr>
-              </thead>
-              <tbody>
-                {% for row in data %}
-                  <tr>
-                    {% for value in row %}
-                      <td>{{ value }}</td>
-                    {% endfor %}
-                  </tr>
-                {% endfor %}
-              </tbody>
-            </table>
-        </div><br><br>    
-        
-        <h1>Select X-axis and Y-axis</h1>
+<br><br>    
+       
         <form method="POST" action="/plot">
-            <p>Select the X-axis:</p>
-            {% for column in columns %}
-                <input type="radio" name="xaxis" value="{{ column }}">{{ column }}<br>
-            {% endfor %}
-            <p>Select the Y-axis:</p>
-            {% for column in columns %}
-                <input type="radio" name="yaxis" value="{{ column }}">{{ column }}<br>
-            {% endfor %}
-            <br><br>
             <input type="submit" value="Submit">
         </form>
        
