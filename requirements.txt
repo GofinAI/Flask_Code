@@ -29,5 +29,4 @@ thrift==0.13.0
 toposort==1.7
 typing_extensions==4.4.0
 urllib3==1.26.12
-wonk==0.6.1
 xdg==5.1.1
