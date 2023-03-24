@@ -1,15 +1,15 @@
-
 from flask import Flask, render_template, request
 import mysql.connector as db
 import matplotlib.pyplot as plt
 import seaborn as sns
-%matplotlib inline
+
 app = Flask(__name__)
+
 mydb = db.connect(
-    host = "host",
-    user = "user",
-    password = "pass",
-    database = "db"
+    host = "gofin-aurora-instance-1.ci0rkg2zgzsd.us-east-1.rds.amazonaws.com",
+    user = "malikam",
+    password = "Malika@98966",
+    database = "usda"
 )
 if mydb:
     print ("Connected Successfully")
@@ -173,7 +173,7 @@ def freq_desc():
 @app.route('/period_ref')
 def period_ref():
     global GD,CD,SD,UD,PP,CDesc,State,table,FD,PD
-    global gd_d, cd_d, sd_d, ud_d, pp_d, cdesc_d, fd_d,pd_d, final_d
+    global gd_d, cd_d, sd_d, ud_d, pp_d, cdesc_d, fd_d,pd_d,final_d
 
     PD = request.args.get("PD")
     cursor = mydb.cursor()
@@ -181,21 +181,20 @@ def period_ref():
     for result in cursor.stored_results():
         final_d = result.fetchall()   
     cursor.close()     
-    columns = ["CROP_TYPE", "PRODUCTION_PRACTICE", "YEAR", "PERIOD_REFERENCE", "STATE_NAME",SD,"CLASS_DESC"]
-    return render_template("Request.html", data = final_d, pd_data = pd_d, fd_data = fd_d, cdesc_data = cdesc_d, pp_data = pp_d, ud_data = ud_d, sd_data = sd_d,cd_data =cd_d,gd_data = gd_d,columns=columns)
+
+    return render_template("Request.html", pd_data = pd_d, fd_data = fd_d, cdesc_data = cdesc_d, pp_data = pp_d, ud_data = ud_d, sd_data = sd_d,cd_data =cd_d,gd_data = gd_d)
 
 @app.route('/plot', methods=['POST'])
 def plot_post():
-    global GD,CD,SD,UD,PP,CDesc,State,table,FD,PD
+    global GD,CD,SD,UD,PP,CDesc,State,table,FD,PD,final_d
     
-    xaxis = request.form['xaxis']
-    yaxis = request.form['yaxis']
+    columns = ["CROP_TYPE", "PRODUCTION_PRACTICE", "YEAR", "PERIOD_REFERENCE", "STATE_NAME",SD,"CLASS_DESC"]
+    
     cursor = mydb.cursor()
     query = "AXIS_SP"
-    cursor.callproc(query, (table,CD, PP,UD,CDesc,SD,FD,PD,xaxis,yaxis))
+    cursor.callproc(query, (table,CD, PP,UD,CDesc,SD,FD,PD,"YEAR",SD))
     for result in cursor.stored_results():
         result = result.fetchall()
-    columns = [description[0] for description in cursor.description]
     # Do something with xaxis and yaxis here
     X=[]
     Y=[]
@@ -205,11 +204,11 @@ def plot_post():
 
     with sns.axes_style('darkgrid'):
         plt.figure(figsize=(15, 5))
-        plt.plot(X,Y,c="mediumseagreen",linewidth = 2.5)
+        plt.plot(X,Y,c="royalblue",linewidth = 2.5)
         # Plot Labels
 
-        plt.xlabel(xaxis, fontsize=15, color='blue',fontweight='bold')
-        plt.ylabel(yaxis,fontsize=15, color='blue',fontweight='bold')
+        plt.xlabel("YEAR", fontsize=15, color='blue',fontweight='bold')
+        plt.ylabel(SD,fontsize=15, color='blue',fontweight='bold')
 
         # Plot Ticks
 
@@ -244,12 +243,16 @@ def plot_post():
         plt.text(X[index]+0.8, max(Y), text,horizontalalignment='left',verticalalignment='center', fontdict=font1,
                  bbox=dict(boxstyle = "square",
                       facecolor = "whitesmoke"))
+        if os.path.exists('static/plot.png'):
+            os.remove('static/plot.png')
         plt.savefig('static/plot.png')  # Save the plot image
-        return render_template('plot.html')
 
+        response = make_response(render_template('plot.html',random=random,data=final_d,column=columns))
+        response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+        response.headers['Expires'] = datetime.utcnow() - timedelta(days=1)
+        response.headers['Pragma'] = 'no-cache'
+        return response
+    
 if __name__ =='__main__':
-    app.run()
-
- 
- 
- 
+    app.run(port=8080)
+        
