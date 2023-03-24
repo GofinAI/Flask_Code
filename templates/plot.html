@@ -2,8 +2,77 @@
 <html>
 <head>
     <title>Flask Plot</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <style>
+        
+        html,body{
+           height:100%;
+        }
+        body {
+            background-color: #f1f1f1;
+            font-family: Arial, sans-serif;
+        }
+        
+        img {
+            height: auto;
+            width: 95%;
+            margin: 20px auto;
+            display: block;
+            border: 1px solid #ddd;
+            box-shadow: 0px 0px 10px 0px #ddd;
+            object-fit: contain;
+        }
+        img:hover {
+            opacity: 0.8;
+        }
+        table {
+                border-collapse: collapse;
+                width: 100%;
+        }
+        th, td {
+            text-align: left;
+            padding: 8px;
+        }
+        th {
+            background-color: #008CBA;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+    </style>
 </head>
 <body>
-    <img src="{{ url_for('static', filename='plot.png') }}" alt="Plot">
+    <div>
+        <img src="{{ url_for('static', filename='plot.png') }}?{{ random.randint(0, 100000) }}" alt="Plot" >
+   </div>
+          
+        
+    <div>
+        <table> 
+          <thead>
+            <tr>
+              {% for column in columns %}
+                <th>{{ column }}</th>
+              {% endfor %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in data %}
+              <tr>
+                {% for value in row %}
+                  <td>{{ value }}</td>
+                {% endfor %}
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+    </div>  
+        
+
 </body>
 </html>
