@@ -1,8 +1,0 @@
-cursor
-Flask
-matplotlib
-mysql-connector-python
-numpy
-seaborn
-
-
