@@ -7,8 +7,8 @@ app = Flask(__name__)
 
 mydb = db.connect(
     host = "gofin-aurora-instance-1.ci0rkg2zgzsd.us-east-1.rds.amazonaws.com",
-    user = "malikam",
-    password = "Malika@98966",
+    user = "nickb",
+    password = "G0f1nP4$$",
     database = "usda"
 )
 if mydb:
