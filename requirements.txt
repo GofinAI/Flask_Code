@@ -1,4 +1,5 @@
 flask==1.1.2
 matplotlib==3.5.1
 seaborn==0.11.2
-os==
+mysql-connector==2.2.9
+datetime==5.1
