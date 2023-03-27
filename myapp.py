@@ -185,7 +185,7 @@ def plot_post():
     
     cursor = mydb.cursor()
     query = "AXIS_SP"
-    cursor.callproc(query, (table,CD, PP,UD,CDesc,SD,FD,PD,"YEAR",SD))
+    cursor.callproc(query, (table,CD, PP,UD,CDesc,SD,FD,PD))
     for result in cursor.stored_results():
         result = result.fetchall()
     # Do something with xaxis and yaxis here
