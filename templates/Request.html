@@ -9,17 +9,22 @@
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
         
         <title> Result </title>
-          <style>
+        <style>
             body {
               background-color: #f2f2f2;
               font-family: Arial, sans-serif;
-              font-size: 14p  
+              font-size: 16px;  
             }
             #con1 {
               margin: 50px 0px;              
             }
             .c1_row1 {
-              border: none;  
+              border: none;
+              padding: 20px;
+            }
+            .col-sm-4 {
+              text-align: center;
+              margin-top: 50px;
             }
               
             /* Target the container fluid divs */
@@ -37,28 +42,59 @@
               border-radius: 5px;
               border: 1px solid #ccc;
               box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+              color: #fff;  
             }
 
             /* Target the radio buttons */
             input[type="radio"] {
-              margin-right: 10px;
+                margin-right: 10px;
             }
-            select option:hover {
-               background-color: #ddd;
-            }
-            select option:checked {
-               background-color: #008CBA;
-               color: white;
-               padding: 5px;
-               border: 1px solid white;
+            input[type="submit"] {
+                background-color: #007bff;
+                color: #fff;
+                padding: 8px 16px;
+                border-radius: 4px;
+                border: none;
+                cursor: pointer;
+                transition: all 0.2s ease-in-out;
+          }
+           input[type="submit"]:hover {
+            background-color: #0069d9;
+          }
+          
+           .jumbotron {
+              background-color: #f0ad4e; /* Change the background color of the jumbotron */
+              color: #fff;
             }
 
-          </style>
+            select option:hover {
+              background-color: #ddd;
+            }
+            select option:checked {
+              background-color: #008CBA;
+              color: white;
+              padding: 5px;
+              border: 1px solid white;
+            }
+
+            /* Responsive styling */
+            @media (max-width: 768px) {
+              .col-sm-4 {
+                margin-top: 20px;
+              }
+            }
+        </style>
     </head>
     <body>
+        <div class="container">
+            <div class="jumbotron">
+                <h1>Welcome to GofinAI Custom Plots</h1>
+                <p>Please select the options below and click on submit button.</p>
+                <p><a class="btn btn-primary btn-lg" href="#" role="button">Learn more</a></p>
+            </div>
         <div class="container-fluid" id="con1">
             
-            <div class="col-sm-4" class="c1_row1" id="gd_select">
+            <div class="col-sm-4 col-xs-12" class="c1_row1" id="gd_select">
                 <form method="POST">
                   <label for="GD">Group Description:</label>  
                    <select name="GD" id="GD" multiple size="4" class="form-group list-group" onclick="executeQuery_gd(event)">
@@ -71,7 +107,7 @@
                 </form>
             </div>    
 
-            <div class="col-sm-4" class="c1_row1" id="cd_select">
+            <div class="col-sm-4 col-xs-12" class="c1_row1" id="cd_select">
                 <form method="POST">
                   <label for="CD">Commodity Description:</label>  
                    <select name="CD" id="CD" multiple size="4" class="form-group list-group" onclick="executeQuery_cd(event)">
@@ -84,7 +120,7 @@
                 </form>
             </div>    
 
-            <div class="col-sm-4" class="c1_row1" id="sd_select">
+            <div class="col-sm-4 col-xs-12" class="c1_row1" id="sd_select">
                 <form method="POST">
                   <label for="SD">Statisticcat Description:</label>  
                    <select name="SD" id="SD" multiple size="4" class="form-group list-group" onclick="executeQuery_sd(event)">
@@ -99,7 +135,7 @@
         </div>
         
         <div class="container-fluid" id="con2">
-            <div class="col-sm-4" class="c1_row1" id="ud_select">
+            <div class="col-sm-4 col-xs-12" class="c1_row1" id="ud_select">
                 <form method="POST">
                   <label for="UD">Unit Description:</label>  
                    <select name="UD" id="UD" multiple size="4" class="form-group list-group" onclick="executeQuery_ud(event)">
@@ -112,7 +148,7 @@
                 </form>
             </div>            
             
-            <div class="col-sm-4" class="c1_row1" id="pp_select">            
+            <div class="col-sm-4 col-xs-12" class="c1_row1" id="pp_select">            
                 <form method="POST">
                   <label for="PP">Production Practice:</label>  
                    <select name="PP" id="PP" multiple size="4" class="form-group list-group" onclick="executeQuery_pp(event)">
@@ -125,7 +161,7 @@
                 </form>
             </div>
         
-            <div class="col-sm-4" class="c1_row1" id="cdesc_select">
+            <div class="col-sm-4 col-xs-12" class="c1_row1" id="cdesc_select">
                 <form method="POST">
                   <label for="CDesc">Class Description:</label>  
                    <select name="CDesc" id="CDesc" multiple size="4" class="form-group list-group" onclick="executeQuery_CDesc(event)">
@@ -141,7 +177,7 @@
         
         <div class="container-fluid" id="con3">
             
-            <div class="col-sm-4" class="c1_row1">
+            <div class="col-sm-4 col-xs-12" class="c1_row1">
                 <form  method="POST" class="form-group">
                       <h4>Select States: </h4>   
                       <label for="States">US TOTAL</label>
@@ -153,7 +189,7 @@
                 </form>
             </div>
                
-            <div class="col-sm-4" class="c1_row1" id="fd_select">
+            <div class="col-sm-4 col-xs-12" class="c1_row1" id="fd_select">
                 <form method="POST">
                   <label for="FD">Freq Description:</label>  
                    <select name="FD" id="FD" multiple  size="4" class="form-group list-group" onclick="executeQuery_FD(event)" >
@@ -166,7 +202,7 @@
                 </form>
             </div> 
         
-          <div class="col-sm-4" class="c1_row1" id="pd_select">
+          <div class="col-sm-4 col-xs-12" class="c1_row1" id="pd_select">
             <form method="POST">
               <label for="PD">Period Reference:</label>  
                <select name="PD" id="PD" multiple  size="4" class="form-group list-group" onclick="executeQuery_PD(event)">
@@ -182,8 +218,11 @@
 <br><br>    
        
         <form method="POST" action="/plot">
-            <input type="submit" value="Submit">
+            <div class="text-center">
+              <input type="submit" class="btn btn-primary btn-lg" value="Submit">
+            </div>
         </form>
+   </div>         
        
         <script>
           
