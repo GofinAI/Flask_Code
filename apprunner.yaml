@@ -1,5 +1,4 @@
 version: 1.0
-cmd: "gunicorn --bind :$PORT app:app"
 runtime: python3
 build:
   commands:
