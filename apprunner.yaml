@@ -1,13 +1,19 @@
 version: 1.0
-env:
-  MYSQL_HOST: "gofin-aurora-instance-1.ci0rkg2zgzsd.us-east-1.rds.amazonaws.com"
-  MYSQL_USER: "malikam"
-  MYSQL_PASSWORD: "Malika@98966"
-  MYSQL_DB: "usda"
 cmd: "gunicorn --bind :$PORT app:app"
-runtime: python3.8
+runtime: python3
 build:
   commands:
     build:
       - pip install -r requirements.txt
+    env:
+        MYSQL_HOST: "gofin-aurora-instance-1.ci0rkg2zgzsd.us-east-1.rds.amazonaws.com"
+        MYSQL_USER: "malikam"
+        MYSQL_PASSWORD: "Malika@98966"
+        MYSQL_DB: "usda"
+run: 
+  runtime-version: 3.7.7
+  command: python myapp.py
+  network:
+    port: 8080
+        
 
