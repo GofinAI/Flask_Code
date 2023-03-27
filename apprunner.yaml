@@ -2,7 +2,9 @@ version: 1.0
 runtime: python3
 build:
   commands:
+    image: python:3.8
     build:
+      - pip install --upgrade pip
       - pip install -r requirements.txt
     env:
         MYSQL_HOST: "gofin-aurora-instance-1.ci0rkg2zgzsd.us-east-1.rds.amazonaws.com"
@@ -10,7 +12,7 @@ build:
         MYSQL_PASSWORD: "Malika@98966"
         MYSQL_DB: "usda"
 run: 
-  runtime-version: 3.7.7
+  runtime-version: 3.8
   command: python myapp.py
   network:
     port: 8080
